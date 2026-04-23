@@ -28,7 +28,7 @@ Qwen 3, GPT-OSS, Gemma 3, Llama and more, with <strong>MoE on phones</strong> vi
   <a href="#-supported-models">Models</a> ·
   <a href="#-android-build">Android</a> ·
   <a href="#-quantization">Quantization</a> ·
-  <a href="#-architecture">Architecture</a>
+  <a href="docs/architecture.md">Architecture</a>
 </p>
 
 </div>
@@ -226,60 +226,6 @@ After quantization, point `quick_dot_ai_run` at the quantized directory (or `mv 
 
 ---
 
-## 🏗️ Architecture
-
-```mermaid
-flowchart TB
-    subgraph Apps["👤 Your application / CLI"]
-        BIN["quick_dot_ai_run<br/>quick_dot_ai_quantize<br/>quick_dot_ai_test_api"]
-    end
-
-    subgraph QAI["☄️ Quick.AI"]
-        direction TB
-        API["libquick_dot_ai_api.so<br/><sub>stable C API</sub>"]
-        CORE["libquick_dot_ai.so<br/><sub>causal-LM engine · namespace quick_dot_ai</sub>"]
-        subgraph LAYERS["🧩 Per-layer plugins (.so)"]
-            direction LR
-            L1["rms_norm"]
-            L2["swiglu"]
-            L3["mha_core"]
-            L4["qkv"]
-            L5["lm_head"]
-            L6["tied_embed"]
-            L7["embed_pool"]
-            L8["…"]
-        end
-    end
-
-    subgraph DEPS["🧱 Foundations"]
-        NNT["NNTrainer<br/><sub>subprojects/nntrainer · meson subproject</sub>"]
-        SYS["OpenBLAS · OpenMP · Flatbuffers"]
-    end
-
-    BIN --> API
-    BIN --> CORE
-    API --> CORE
-    CORE --> LAYERS
-    CORE --> NNT
-    LAYERS --> NNT
-    NNT --> SYS
-
-    classDef app fill:#fff7e6,stroke:#fa8c16,color:#874d00
-    classDef qai fill:#e6f4ff,stroke:#1677ff,color:#003a8c
-    classDef plugin fill:#f6ffed,stroke:#52c41a,color:#135200
-    classDef dep fill:#f5f5f5,stroke:#8c8c8c,color:#262626
-    class BIN app
-    class API,CORE qai
-    class L1,L2,L3,L4,L5,L6,L7,L8 plugin
-    class NNT,SYS dep
-```
-
-- **Stable seam.** The C API in `api/causal_lm_api.h` is the integration surface and is intentionally **not renamed** — existing embedders keep building.
-- **Lean dependency graph.** NNTrainer is pulled in as a Meson subproject with `enable-app=false`, `enable-test=false`, and the TFLite backbone disabled — only the core engine and the C++ API ride along.
-- **Per-layer `.so`s.** Custom transformer pieces are loaded as plugins, so swapping in a new attention kernel doesn't require relinking the whole library.
-
----
-
 ## 🧪 Continuous integration
 
 Every PR is gated by:
@@ -297,6 +243,7 @@ Workflows live under [`.github/workflows/`](.github/workflows/).
 
 ## 📚 Further reading
 
+- 🏗️ [Architecture deep-dive](docs/architecture.md) — layered diagram, module-by-module breakdown, design choices
 - 📖 [Model implementation guide](models/README.md)
 - 🧩 [C API reference](api/README.md)
 - 📊 [Benchmark tooling](benchmarks/README.md)
