@@ -1,0 +1,32 @@
+# Build outputs
+build/
+builddir/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Meson subproject cache
+subprojects/packagecache/
+subprojects/.wraplock
+
+# Encoder staging
+encoder/
+encoder-*.tar.gz
+json.hpp
+
+# Android build outputs
+jni/libs/
+jni/obj/
+
+# Editor junk
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Python
+__pycache__/
+*.pyc

@@ -1,0 +1,1 @@
+option('platform', type: 'combo', choices: ['none', 'tizen', 'yocto', 'android', 'windows'], value: 'none')

@@ -1,3 +1,34 @@
+project('nntrainer-causallm', 'c', 'cpp',
+  version: '0.1.0',
+  license: ['apache-2.0'],
+  meson_version: '>=0.55.0',
+  default_options: [
+    'warning_level=1',
+    'c_std=gnu89',
+    'cpp_std=c++17',
+    'buildtype=release',
+  ],
+)
+
+# Pull in nntrainer via the bundled submodule as a meson subproject.
+# We disable Applications so that nntrainer's own (now legacy) in-tree
+# Applications/CausalLM is not built alongside this standalone one, and
+# we skip tests to keep the dependency build lean.
+nntrainer_proj = subproject('nntrainer',
+  default_options: [
+    'enable-app=false',
+    'enable-test=false',
+    'werror=false',
+  ],
+)
+
+nntrainer_dep       = nntrainer_proj.get_variable('nntrainer_dep')
+nntrainer_ccapi_dep = nntrainer_proj.get_variable('nntrainer_ccapi_dep')
+application_install_dir = get_option('prefix') / get_option('libdir') / 'nntrainer-causallm'
+
+openmp_dep = dependency('openmp')
+powershell_prog = find_program('powershell', required: (build_machine.system() == 'windows'))
+
 causallm_src = [
     meson.current_source_dir() / 'huggingface_tokenizer.cpp',
     meson.current_source_dir() / 'llm_util.cpp',
@@ -34,9 +65,9 @@ causallm_layer_dependencies += [
 subdir('models')
 
 if (get_option('platform') == 'windows') and (build_machine.system() == 'windows')
-    run_command(powershell_prog, '-ExecutionPolicy', 'Bypass', '-File', join_paths(meson.source_root(), 'jni', 'prepare_encoder.ps1'), meson.build_root(), '0.2', check: true)
+    run_command(powershell_prog, '-ExecutionPolicy', 'Bypass', '-File', join_paths(meson.current_source_dir(), 'jni', 'prepare_encoder.ps1'), meson.build_root(), '0.2', check: true)
 elif get_option('platform') != 'tizen'
-    run_command([meson.source_root() / 'jni' / 'prepare_encoder.sh', meson.build_root(), '0.2'], check: true)
+    run_command([meson.current_source_dir() / 'jni' / 'prepare_encoder.sh', meson.build_root(), '0.2'], check: true)
 endif
 
 tokenizer_dependencies = []
@@ -53,7 +84,7 @@ causallm = shared_library('causallm',
     dependencies: [
         nntrainer_dep,
         nntrainer_ccapi_dep,
-        causallm_layer_dependencies, 
+        causallm_layer_dependencies,
         tokenizer_dependencies,
         openmp_dep
     ],

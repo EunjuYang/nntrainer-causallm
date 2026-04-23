@@ -43,10 +43,19 @@ For detailed documentation, please refer to [API Documentation](api/README.md).
 
 ### 2. PC Build & Test
 
-Compile the application with transformer support enabled.
+This repository builds against `nntrainer`, which is bundled as a git submodule under `subprojects/nntrainer`. Clone with submodules (or init them after cloning):
 
 ```bash
-$ meson build -Denable-fp16=true -Dthread-backend=omp -Denable-transformer=true -Domp-num-threads=4
+$ git clone --recursive https://github.com/eunjuyang/nntrainer-causallm.git
+$ cd nntrainer-causallm
+# or, if already cloned without --recursive:
+$ git submodule update --init --recursive
+```
+
+Compile the application:
+
+```bash
+$ meson setup build -Denable-fp16=true -Dthread-backend=omp -Domp-num-threads=4
 $ ninja -C build
 ```
 
@@ -54,12 +63,12 @@ Run the model:
 
 ```bash
 $ export OMP_THREAD_LIMIT=16 && export OMP_WAIT_POLICY=active && export OMP_PROC_BIND=true && export OMP_PLACES=cores && export OMP_NUM_THREADS=4
-$ ./build/Applications/CausalLM/nntr_causallm {your model config folder}
+$ ./build/nntr_causallm {your model config folder}
 ```
 
 e.g.,
 ```bash
-$ ./build/Applications/CausalLM/nntr_causallm /tmp/nntrainer/Applications/CausalLM/res/qwen3/qwen3-4b/
+$ ./build/nntr_causallm ./res/qwen3/qwen3-4b/
 ```
 
 ### 3. Android Build & Test
@@ -74,7 +83,7 @@ The Android build process is modularized to support building the core library, A
 
 #### Build Scripts
 
-The following scripts are provided in `Applications/CausalLM/` to handle the build process:
+The following scripts are provided at the repository root to handle the build process:
 
 1.  **`build_android.sh`** (Core + App):
     - Builds `nntrainer` core library for Android.
@@ -106,7 +115,6 @@ The following scripts are provided in `Applications/CausalLM/` to handle the bui
 
 2.  **Build Core & Main App**:
     ```bash
-    cd Applications/CausalLM
     ./build_android.sh
     ```
     Artifacts in `jni/libs/arm64-v8a/`:
@@ -171,8 +179,8 @@ The model directory must contain the following files:
 The quantization utility is built automatically with the CausalLM application:
 
 ```bash
-meson build && ninja -C build
-# The executable is: build/Applications/CausalLM/nntr_quantize
+meson setup build && ninja -C build
+# The executable is: build/nntr_quantize
 ```
 
 ### Usage
