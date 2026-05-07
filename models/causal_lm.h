@@ -70,7 +70,7 @@ public:
    * @brief run the CausalLM model
    */
   void run(const WSTR prompt, bool do_sample = false,
-           const WSTR system_prompt = "", const WSTR tail_prompt = "",
+           const WSTR system_prompt = WSTR(), const WSTR tail_prompt = WSTR(),
            bool log_output = true) override;
 
   /**
@@ -84,6 +84,15 @@ public:
    * @brief get the status of run
    */
   bool hasRun() const { return has_run_; }
+
+  /**
+   * @brief Reset per-request generation state before a stateless serving run.
+   */
+  void resetGenerationState() {
+    pending_ids_.clear();
+    global_token_len = 0;
+    has_run_ = false;
+  }
 
 protected:
   /**
