@@ -41,3 +41,6 @@ jni/obj/
 # Python
 __pycache__/
 *.pyc
+
+logs/
+res/
