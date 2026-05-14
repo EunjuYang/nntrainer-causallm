@@ -43,7 +43,7 @@ TEST(FactoryTest, RegisteredCreatorIsInvoked) {
   factory.registerModel(
     "UT/SpyCreator",
     [&creator_invoked](json & /*cfg*/, json & /*gen*/, json & /*nntr*/)
-      -> std::unique_ptr<quick_dot_ai::Transformer> {
+      -> std::unique_ptr<quick_dot_ai::TransformerBase> {
       creator_invoked = true;
       return nullptr;
     });
@@ -63,11 +63,11 @@ TEST(FactoryTest, LastRegisteredCreatorWinsForSameKey) {
   int which = 0;
   factory.registerModel("UT/Overridable", [&which](json &, json &, json &) {
     which = 1;
-    return std::unique_ptr<quick_dot_ai::Transformer>(nullptr);
+    return std::unique_ptr<quick_dot_ai::TransformerBase>(nullptr);
   });
   factory.registerModel("UT/Overridable", [&which](json &, json &, json &) {
     which = 2;
-    return std::unique_ptr<quick_dot_ai::Transformer>(nullptr);
+    return std::unique_ptr<quick_dot_ai::TransformerBase>(nullptr);
   });
 
   json cfg = json::object();
